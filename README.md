@@ -41,4 +41,4 @@ src/app/
 
 ## 🌐 Live
 
-[daisy-bot.vercel.app](https://daisy-bot.vercel.app)
+[daisybot.vercel.app](https://daisybot.vercel.app)
