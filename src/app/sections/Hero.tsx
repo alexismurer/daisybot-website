@@ -2,286 +2,120 @@
 
 import Image from 'next/image'
 import { useEffect, useRef } from 'react'
-import { Button } from '@/components/ui/button'
+import { gsap } from 'gsap'
+import DaisyFlower from '@/components/DaisyFlower'
+import DiscordIcon from '@/components/DiscordIcon'
 import { INVITE_URL } from '@/lib/constants'
 
+const CHAT = [
+  { from: 'you', text: 'hey! how are you doing?' },
+  { from: 'daisy', text: "I'm doing amazing. Just thinking about you. What's on your mind?" },
+  { from: 'you', text: "big exam on friday, kinda stressed 😅" },
+  { from: 'daisy', text: "You've got this! Tell me how it went after, I want to hear everything 🌼" },
+] as const
+
+const FLOATERS = [
+  { size: 64, top: '12%', left: '6%', petal: '#fff', center: '#ffc93c' },
+  { size: 38, top: '70%', left: '3%', petal: '#ffd6e2', center: '#f5a524' },
+  { size: 52, top: '8%', left: '88%', petal: '#e6dcff', center: '#ffc93c' },
+  { size: 30, top: '82%', left: '92%', petal: '#fff', center: '#f5a524' },
+  { size: 26, top: '46%', left: '48%', petal: '#d7f5e3', center: '#ffc93c' },
+]
+
 export default function Hero() {
-  const outerRotateRef = useRef<HTMLDivElement>(null)
-  const innerPulseRef = useRef<HTMLDivElement>(null)
-  const ringRef = useRef<HTMLDivElement>(null)
-  const ringGlowRef = useRef<HTMLDivElement>(null)
-  const nameRef = useRef<HTMLHeadingElement>(null)
-  const taglineRef = useRef<HTMLParagraphElement>(null)
-  const ctaRef = useRef<HTMLDivElement>(null)
-  const particleContainerRef = useRef<HTMLDivElement>(null)
+  const rootRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
-    let gsapCtx: { revert: () => void } | null = null
-    const intervals: ReturnType<typeof setInterval>[] = []
-    const timeouts: ReturnType<typeof setTimeout>[] = []
-    let splitInstance: { revert: () => void } | null = null
-
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-    import('gsap').then(({ gsap }) => {
-      import('gsap/SplitText').then(({ SplitText }) => {
-        import('gsap/ScrollTrigger') // preload for other sections
-        gsap.registerPlugin(SplitText)
-
-        gsapCtx = gsap.context(() => {
-          if (prefersReduced) {
-            gsap.from([nameRef.current, taglineRef.current, ctaRef.current], {
-              opacity: 0, duration: 0.6, stagger: 0.2,
-            })
-            return
-          }
-
-          // Logo entry
-          gsap.from(outerRotateRef.current, { scale: 0.8, opacity: 0, duration: 0.7, ease: 'power3.out' })
-
-          // Ambient rings
-          gsap.to([ringRef.current, ringGlowRef.current], {
-            rotation: 360, duration: 4, repeat: -1, ease: 'none',
-          })
-
-          // Particles
-          const container = particleContainerRef.current
-          if (container) {
-            const centerX = window.innerWidth / 2
-            const centerY = window.innerHeight * 0.38
-            for (let i = 0; i < 12; i++) {
-              const angle = Math.random() * Math.PI * 2
-              const radius = 60 + Math.random() * 160
-              const x = centerX + Math.cos(angle) * radius
-              const startY = centerY + Math.sin(angle) * radius
-              if (startY > centerY + 100) continue
-              const size = 4 + Math.random() * 6
-              const particle = document.createElement('div')
-              particle.style.cssText = `position:absolute;left:${x}px;top:${startY}px;width:${size}px;height:${size}px;border-radius:50%;background:rgba(88,101,242,0.25);filter:blur(2px);pointer-events:none`
-              container.appendChild(particle)
-              gsap.to(particle, {
-                y: -(80 + Math.random() * 80), opacity: 0,
-                duration: 3 + Math.random() * 3, repeat: -1,
-                delay: Math.random() * 4, ease: 'power1.out',
-                onRepeat() { gsap.set(particle, { y: 0, opacity: 0.25 + Math.random() * 0.3 }) },
-              })
-            }
-          }
-
-          // ── Scramble "Daisy" ───────────────────────────────────────────
-          const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%'
-          const SCRAMBLE_START_MS = 350  // after logo starts
-          const CHAR_STAGGER_MS  = 90
-          const TICK_MS          = 45
-          const TICK_COUNT       = 8
-
-          if (nameRef.current) {
-            const split = new SplitText(nameRef.current, { type: 'chars' })
-            splitInstance = split
-            const chars = split.chars as HTMLElement[]
-
-            // Hide all chars initially; tagline & CTA also hidden
-            chars.forEach(el => gsap.set(el, { opacity: 0 }))
-            gsap.set([taglineRef.current, ctaRef.current], { opacity: 0 })
-
-            let scrambleEndMs = 0
-
-            chars.forEach((el, i) => {
-              const target = el.textContent ?? ''
-              const charStartMs = SCRAMBLE_START_MS + i * CHAR_STAGGER_MS
-              const charEndMs   = charStartMs + TICK_COUNT * TICK_MS + 300 // +300 for color settle
-              scrambleEndMs = Math.max(scrambleEndMs, charEndMs)
-
-              const t = setTimeout(() => {
-                gsap.set(el, { opacity: 1, color: '#5865F2' })
-                let ticks = 0
-                const iv = setInterval(() => {
-                  el.textContent = GLYPHS[Math.floor(Math.random() * GLYPHS.length)]
-                  ticks++
-                  if (ticks >= TICK_COUNT) {
-                    clearInterval(iv)
-                    el.textContent = target
-                    gsap.to(el, { color: 'var(--text-heading)', duration: 0.35, ease: 'power2.out' })
-                  }
-                }, TICK_MS)
-                intervals.push(iv)
-              }, charStartMs)
-              timeouts.push(t)
-            })
-
-            // ── Tagline blur-focus (starts only after scramble ends) ──────
-            const t2 = setTimeout(() => {
-              if (!taglineRef.current) return
-              gsap.fromTo(
-                taglineRef.current,
-                { opacity: 0, filter: 'blur(8px)', y: 6 },
-                { opacity: 1, filter: 'blur(0px)', y: 0, duration: 1, ease: 'power2.out' },
-              )
-              // CTA after tagline resolves
-              const t3 = setTimeout(() => {
-                gsap.fromTo(
-                  ctaRef.current,
-                  { opacity: 0, y: 14 },
-                  { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' },
-                )
-              }, 900)
-              timeouts.push(t3)
-            }, scrambleEndMs + 80)
-            timeouts.push(t2)
-          }
-        })
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const ctx = gsap.context(() => {
+      gsap.from('[data-intro]', { y: 24, opacity: 0, duration: 0.8, stagger: 0.1, ease: 'back.out(1.6)', clearProps: 'opacity,transform,translate,rotate,scale' })
+      gsap.from('[data-bubble]', { y: 16, scale: 0.9, opacity: 0, duration: 0.5, stagger: 0.45, delay: 0.5, ease: 'back.out(2)', clearProps: 'opacity,transform,translate,rotate,scale' })
+      gsap.utils.toArray<HTMLElement>('[data-floater]').forEach((el, i) => {
+        gsap.to(el, { y: -14, rotation: i % 2 ? 18 : -18, duration: 3 + i * 0.6, repeat: -1, yoyo: true, ease: 'sine.inOut' })
       })
-    })
-
-    return () => {
-      intervals.forEach(clearInterval)
-      timeouts.forEach(clearTimeout)
-      splitInstance?.revert()
-      gsapCtx?.revert()
-    }
+    }, rootRef)
+    return () => ctx.revert()
   }, [])
 
   return (
-    <section
-      className="relative flex flex-col items-center justify-center min-h-dvh overflow-hidden"
-      style={{ background: 'var(--bg)' }}
-    >
-      {/* Radial background glow */}
+    <section ref={rootRef} className="relative overflow-hidden bg-cream">
       <div
+        aria-hidden="true"
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'radial-gradient(ellipse 60% 50% at 50% 40%, rgba(88,101,242,0.07) 0%, transparent 70%)',
+            'radial-gradient(40% 50% at 20% 25%, rgba(255,201,60,0.28), transparent 70%), radial-gradient(35% 45% at 85% 70%, rgba(255,179,199,0.35), transparent 70%), radial-gradient(30% 40% at 70% 10%, rgba(207,194,255,0.35), transparent 70%)',
         }}
       />
-
-      {/* Particle container (absolutely positioned, z-0) */}
-      <div
-        ref={particleContainerRef}
-        className="pointer-events-none absolute inset-0 overflow-hidden"
-        aria-hidden="true"
-      />
-
-      {/* Logo — static image with orbiting shimmer ring */}
-      <div ref={outerRotateRef} className="relative z-10 mb-6" style={{ width: 180, height: 180 }}>
-        {/* Blurred glow ring — rotates */}
-        <div
-          ref={ringGlowRef}
-          aria-hidden="true"
-          style={{
-            position: 'absolute',
-            inset: -16,
-            borderRadius: '50%',
-            background: 'conic-gradient(rgba(88,101,242,0) 0deg, rgba(88,101,242,0.18) 70deg, rgba(60,75,220,0.32) 120deg, rgba(88,101,242,0) 200deg)',
-            filter: 'blur(10px)',
-            pointerEvents: 'none',
-          }}
-        />
-        {/* Sharp arc ring — rotates */}
-        <div
-          ref={ringRef}
-          aria-hidden="true"
-          style={{
-            position: 'absolute',
-            inset: -7,
-            borderRadius: '50%',
-            background: 'conic-gradient(rgba(88,101,242,0) 0deg, rgba(88,101,242,0.75) 75deg, rgba(60,75,220,1) 115deg, rgba(88,101,242,0) 195deg)',
-            WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 3px), white calc(100% - 3px))',
-            mask: 'radial-gradient(farthest-side, transparent calc(100% - 3px), white calc(100% - 3px))',
-            pointerEvents: 'none',
-          }}
-        />
-        {/* Static logo */}
-        <div ref={innerPulseRef} style={{ width: 180, height: 180, borderRadius: '50%', overflow: 'hidden', position: 'relative', zIndex: 2 }}>
-          <Image
-            src="/daisybot.logo.png"
-            alt="Daisy bot logo"
-            fill
-            priority
-            sizes="180px"
-            style={{ objectFit: 'cover', objectPosition: 'center', borderRadius: '50%' }}
-          />
+      {FLOATERS.map((f, i) => (
+        <div key={i} data-floater className="pointer-events-none absolute hidden lg:block" style={{ top: f.top, left: f.left }}>
+          <DaisyFlower size={f.size} petal={f.petal} center={f.center} />
         </div>
-      </div>
+      ))}
 
-      {/* Name */}
-      <h1
-        ref={nameRef}
-        className="font-fraunces z-10"
-        style={{
-          fontStyle: 'italic',
-          fontWeight: 300,
-          fontSize: 'clamp(52px, 10vw, 88px)',
-          color: 'var(--text-heading)',
-          letterSpacing: '-0.02em',
-          lineHeight: 1,
-          marginBottom: 16,
-        }}
-      >
-        Daisy
-      </h1>
-
-      {/* Tagline */}
-      <p
-        ref={taglineRef}
-        className="font-manrope z-10 text-center px-6"
-        style={{
-          fontWeight: 300,
-          fontSize: 16,
-          color: 'var(--brand-accent-mid)',
-          letterSpacing: '0.03em',
-          marginBottom: 32,
-          maxWidth: 400,
-        }}
-      >
-        Always listening. Always remembering. Always yours.
-      </p>
-
-      {/* CTA */}
-      <div ref={ctaRef} className="z-10">
-        <a
-          href={INVITE_URL}
-          className="inline-flex items-center gap-2.5 font-manrope"
-          style={{
-            borderRadius: 4,
-            background: '#5865F2',
-            color: '#fff',
-            fontWeight: 500,
-            fontSize: 15,
-            padding: '11px 24px',
-            textDecoration: 'none',
-            transition: 'background 0.2s, box-shadow 0.2s',
-            boxShadow: '0 2px 12px rgba(88,101,242,0.35)',
-          }}
-          onMouseEnter={(e) => {
-            const el = e.currentTarget as HTMLAnchorElement
-            el.style.background = '#4752C4'
-            el.style.boxShadow = '0 4px 20px rgba(88,101,242,0.5)'
-          }}
-          onMouseLeave={(e) => {
-            const el = e.currentTarget as HTMLAnchorElement
-            el.style.background = '#5865F2'
-            el.style.boxShadow = '0 2px 12px rgba(88,101,242,0.35)'
-          }}
-        >
-          {/* Discord logo */}
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
-          </svg>
-          Add Daisy to your server
+      <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-6 pt-6">
+        <div className="flex items-center gap-2.5">
+          <DaisyFlower size={34} />
+          <span className="font-fraunces text-2xl font-semibold italic text-ink">Daisy</span>
+        </div>
+        <a href="#showcase" className="rounded-full px-4 py-2 text-sm font-bold text-ink-soft transition hover:bg-white/70 hover:text-ink">
+          See Daisy in action
         </a>
-      </div>
+      </header>
 
-      {/* Scroll hint */}
-      <div
-        className="absolute bottom-8 flex flex-col items-center gap-2 font-syne"
-        style={{ fontSize: 10, letterSpacing: '0.15em', color: 'var(--text-muted)', textTransform: 'uppercase' }}
-        aria-hidden="true"
-      >
-        Scroll
-        <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
-          <path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+      <div className="relative z-10 mx-auto grid min-h-[calc(100dvh-80px)] max-w-6xl items-center gap-12 px-6 py-16 lg:grid-cols-[1.05fr_1fr]">
+        <div className="flex flex-col items-start gap-6">
+          <span data-intro className="rounded-full bg-white px-4 py-1.5 text-sm font-bold text-ink-soft shadow-[0_2px_0_rgba(43,33,24,0.08)]">
+            🌼 An AI companion for your Discord server
+          </span>
+          <h1 data-intro className="font-fraunces text-[clamp(48px,7vw,84px)] font-semibold leading-[0.98] tracking-[-0.02em] text-ink" style={{ fontVariationSettings: '"SOFT" 100, "WONK" 1' }}>
+            Meet <span className="italic text-sun-deep">Daisy</span>,
+            <br />
+            your sunniest
+            <br />
+            server member.
+          </h1>
+          <p data-intro className="max-w-md text-lg leading-relaxed text-ink-soft">
+            Always listening. Always remembering. Always yours. Just @mention Daisy and pick up right where you left off.
+          </p>
+          <div data-intro className="flex flex-wrap items-center gap-3">
+            <a
+              href={INVITE_URL}
+              className="inline-flex items-center gap-2.5 rounded-full bg-blurple px-6 py-3.5 text-[15px] font-extrabold text-white shadow-[0_6px_0_#3c45b5] transition-transform hover:-translate-y-0.5 active:translate-y-1 active:shadow-[0_2px_0_#3c45b5]"
+            >
+              <DiscordIcon />
+              Add Daisy to your server
+            </a>
+            <span className="text-sm font-semibold text-ink-soft">Free to add</span>
+          </div>
+        </div>
+
+        <div data-intro className="relative mx-auto w-full max-w-md">
+          <div className="absolute -inset-4 -rotate-2 rounded-[2rem] bg-sun/60" aria-hidden="true" />
+          <div className="relative rounded-[1.75rem] border-2 border-ink/10 bg-white p-5 shadow-[0_24px_60px_-20px_rgba(43,33,24,0.35)]">
+            <div className="mb-4 flex items-center gap-2 border-b border-ink/10 pb-3 text-sm font-bold text-ink-soft">
+              <span className="text-ink/30">#</span> general
+            </div>
+            <ul className="flex flex-col gap-3">
+              {CHAT.map((m, i) => (
+                <li key={i} data-bubble className={`flex items-end gap-2 ${m.from === 'you' ? 'justify-end' : ''}`}>
+                  {m.from === 'daisy' && (
+                    <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full ring-2 ring-sun">
+                      <Image src="/daisybot.logo.png" alt="" fill sizes="32px" className="object-cover" />
+                    </span>
+                  )}
+                  <p
+                    className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-[15px] leading-snug ${
+                      m.from === 'you' ? 'rounded-br-md bg-lilac/70 text-ink' : 'rounded-bl-md bg-cream-deep text-ink'
+                    }`}
+                  >
+                    {m.text}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
     </section>
   )

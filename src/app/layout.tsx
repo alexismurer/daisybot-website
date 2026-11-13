@@ -1,38 +1,24 @@
 import type { Metadata } from 'next'
-import { Fraunces, Manrope, Syne, Space_Mono } from 'next/font/google'
+import { Fraunces, Nunito } from 'next/font/google'
 import './globals.css'
 
 const fraunces = Fraunces({
   subsets: ['latin'],
-  weight: ['300', '600'],
   style: ['normal', 'italic'],
+  axes: ['SOFT', 'WONK', 'opsz'],
   variable: '--font-fraunces-var',
   display: 'swap',
 })
 
-const manrope = Manrope({
+const nunito = Nunito({
   subsets: ['latin'],
-  weight: ['300', '400', '500'],
-  variable: '--font-manrope-var',
-  display: 'swap',
-})
-
-const syne = Syne({
-  subsets: ['latin'],
-  weight: ['400', '600', '700'],
-  variable: '--font-syne-var',
-  display: 'swap',
-})
-
-const spaceMono = Space_Mono({
-  subsets: ['latin'],
-  weight: ['400'],
-  variable: '--font-space-mono-var',
+  weight: ['400', '600', '700', '800'],
+  variable: '--font-nunito-var',
   display: 'swap',
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://daisy-bot.vercel.app'),
+  metadataBase: new URL('https://daisybot.vercel.app'),
   title: 'Daisy — Your AI Companion for Discord',
   description:
     'Always listening. Always remembering. Always yours. Add Daisy to your Discord server.',
@@ -45,10 +31,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${fraunces.variable} ${manrope.variable} ${syne.variable} ${spaceMono.variable}`}
-    >
+    <html lang="en" className={`${fraunces.variable} ${nunito.variable}`}>
       <body>{children}</body>
     </html>
   )

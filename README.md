@@ -1,44 +1,37 @@
-# 🌼 Daisy — AI Companion for Discord
+# Daisy — Website
 
-> *Always listening. Always remembering. Always yours.*
+**The landing page for Daisy, an AI companion bot for Discord.**
 
-Landing page for **Daisy**, an AI companion Discord bot. Built with Next.js 16 and a focus on craft.
+A bright, animated one-pager that introduces Daisy, shows the bot in action and gets people to add it to their server in one click.
 
----
+**[daisybot.vercel.app →](https://daisybot.vercel.app)**
 
-## ✨ Stack
+![Hero](docs/screenshots/hero.jpg)
 
-| | |
-|---|---|
-| **Framework** | Next.js 16 (App Router) |
-| **UI** | React 19 + shadcn/ui + Radix UI |
-| **Styling** | Tailwind CSS v4 |
-| **Animations** | GSAP |
-| **Fonts** | Fraunces · Manrope · Syne · Space Mono |
-| **Deployment** | Vercel |
+> 🌼 Looking for the bot itself? Daisy's code lives in **[alexismurer/daisybot](https://github.com/alexismurer/daisybot)**: a LangChain + LangGraph Discord bot with long-term memory, custom personas and image generation.
 
-## 🚀 Getting Started
+| See Daisy in action | Features |
+| --- | --- |
+| ![Showcase](docs/screenshots/showcase.jpg) | ![Features](docs/screenshots/features.jpg) |
+
+## Tech stack
+
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · GSAP · lucide-react · Vercel
+
+The daisies, icons and Discord mark are all vectors; the only images are Daisy's avatar and real screenshots from the bot.
+
+## Getting started
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000). The "Add to Discord" buttons use the invite link in `src/lib/constants.ts`.
 
-## 📁 Structure
-
-```
-src/app/
-├── sections/
-│   ├── Hero.tsx
-│   ├── Showcase.tsx
-│   ├── Features.tsx
-│   ├── TechStack.tsx
-│   └── Footer.tsx
-└── page.tsx
-```
-
-## 🌐 Live
-
-[daisybot.vercel.app](https://daisybot.vercel.app)
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the dev server |
+| `npm run build` | Production build |
+| `npm run start` | Serve the production build |
+| `npm run lint` | Lint the project |

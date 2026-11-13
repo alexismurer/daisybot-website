@@ -5,40 +5,37 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --bg: #06060e;
-  --surface: #0a0b14;
-  --surface-hover: #0d0e1c;
-  --brand-border: rgba(88, 101, 242, 0.15);
-  --brand-border-hover: rgba(88, 101, 242, 0.35);
-  --text-heading: #e0e2f8;
-  --text-body: #8088b8;
-  --text-muted: #454870;
-  --brand-accent: #7c87f5;
-  --brand-accent-mid: #a0a8e8;
+  --cream: #fff8ec;
+  --cream-deep: #ffefd2;
+  --ink: #2b2118;
+  --ink-soft: #6b5a49;
+  --sun: #ffc93c;
+  --sun-deep: #f5a524;
+  --pink: #ffb3c7;
+  --lilac: #cfc2ff;
+  --mint: #bdebd0;
+  --sky: #bfe3ff;
   --blurple: #5865f2;
   --supabase: #3fcf8e;
   --ts-blue: #3178c6;
-
-  /* Font variables — set by next/font in layout.tsx */
-  --font-fraunces-var: '';
-  --font-manrope-var: '';
-  --font-syne-var: '';
-  --font-space-mono-var: '';
 }
 
 @theme inline {
-  /* Custom fonts */
+  /* Custom fonts (variables come from next/font in layout.tsx) */
   --font-fraunces: var(--font-fraunces-var), serif;
-  --font-manrope: var(--font-manrope-var), sans-serif;
-  --font-syne: var(--font-syne-var), sans-serif;
-  --font-mono: var(--font-space-mono-var), monospace;
+  --font-nunito: var(--font-nunito-var), sans-serif;
 
   /* Custom colors */
-  --color-bg: var(--bg);
-  --color-surface: var(--surface);
-  --color-surface-hover: var(--surface-hover);
-  --color-brand-accent: var(--brand-accent);
-  --color-brand-accent-mid: var(--brand-accent-mid);
+  --color-cream: var(--cream);
+  --color-cream-deep: var(--cream-deep);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-sun: var(--sun);
+  --color-sun-deep: var(--sun-deep);
+  --color-pink: var(--pink);
+  --color-lilac: var(--lilac);
+  --color-mint: var(--mint);
+  --color-sky: var(--sky);
   --color-blurple: var(--blurple);
   --color-supabase: var(--supabase);
   --color-ts-blue: var(--ts-blue);
@@ -166,8 +163,9 @@ html {
 }
 
 body {
-  background: var(--bg);
-  color: var(--text-heading);
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-nunito-var), system-ui, sans-serif;
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
